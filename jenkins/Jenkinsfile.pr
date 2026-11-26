@@ -1,36 +1,59 @@
-pipeline {
+﻿pipeline {
     agent any
 
     environment {
-        COMPOSE_PROJECT_NAME = "sms_pr_${env.BUILD_NUMBER}"
-        HOST_PORT = "5001"
-        APP_VERSION = "pr-${env.BUILD_NUMBER}"
-        PYTHON_VERSION = "3.12"
+        COMPOSE_PROJECT_NAME = "sms_pr_${BUILD_NUMBER}"
+        WEB_PORT = "5001"
+        APP_VERSION = "pr-${BUILD_NUMBER}"
     }
 
     stages {
-        stage('Checkout PR Branch') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Build Docker Image & Run Unit Tests') {
+        stage('Setup') {
+            steps {
+                bat '''
+                if not exist artifacts mkdir artifacts
+                docker --version
+                docker compose version
+                echo Target Branch: %CHANGE_TARGET%
+                echo Source Branch: %CHANGE_BRANCH%
+                '''
+            }
+        }
+
+        stage('Build') {
             steps {
                 bat 'docker compose build'
                 bat 'docker run --rm -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% pytest -v --junitxml=/app/artifacts/pr_unit_tests.xml'
             }
         }
 
-        stage('Start Container Stack') {
+        stage('Run (Docker)') {
             steps {
                 bat 'docker compose up -d'
             }
         }
 
-        stage('Smoke Tests (Live Container)') {
+        stage('Smoke Test') {
             steps {
                 bat 'docker run --rm --network %COMPOSE_PROJECT_NAME%_sms_network -v "%WORKSPACE%/scripts:/app/scripts" -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% python /app/scripts/smoke_test.py --url http://web:5000 --report /app/artifacts/pr_smoke_report.json'
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                bat '''
+                echo Pipeline: sms-pr-multibranch > artifacts/pr_pipeline_report.txt
+                echo Build: #%BUILD_NUMBER% >> artifacts/pr_pipeline_report.txt
+                echo PR ID: %CHANGE_ID% (%CHANGE_BRANCH% -> %CHANGE_TARGET%) >> artifacts/pr_pipeline_report.txt
+                echo Status: PASSED >> artifacts/pr_pipeline_report.txt
+                '''
+                archiveArtifacts artifacts: 'artifacts/*.json, artifacts/*.xml, artifacts/*.txt', allowEmptyArchive: false
             }
         }
     }
@@ -38,7 +61,6 @@ pipeline {
     post {
         always {
             bat 'docker compose down -v'
-            archiveArtifacts artifacts: 'artifacts/*.json, artifacts/*.xml', allowEmptyArchive: true
         }
     }
 }
