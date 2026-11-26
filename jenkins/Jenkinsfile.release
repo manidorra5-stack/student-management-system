@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'RELEASE_TAG', defaultValue: 'v1.0.0', description: 'Semantic version tag (e.g., v1.0.0)')
+    }
+
+    environment {
+        COMPOSE_PROJECT_NAME = "sms_rel_${env.BUILD_NUMBER}"
+        HOST_PORT = "5003"
+        CLEAN_VERSION = "${params.RELEASE_TAG.replaceFirst('^v', '')}"
+        APP_VERSION = "${CLEAN_VERSION}"
+    }
+
+    stages {
+        stage('Checkout Release Tag') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Versioned Production Image') {
+            steps {
+                bat 'docker compose build'
+                bat 'docker tag student-management-system:%APP_VERSION% student-management-system:latest'
+            }
+        }
+
+        stage('Release Verification & Smoke Test') {
+            steps {
+                bat 'docker compose up -d'
+                bat 'python scripts/smoke_test.py --url http://localhost:5003 --report artifacts/release_smoke_report.json'
+            }
+        }
+
+        stage('Generate Release Manifest') {
+            steps {
+                bat '''
+                    echo Release Tag: %RELEASE_TAG% > artifacts/release_manifest_%RELEASE_TAG%.txt
+                    echo Image: student-management-system:%APP_VERSION% >> artifacts/release_manifest_%RELEASE_TAG%.txt
+                    docker images student-management-system:%APP_VERSION% >> artifacts/release_manifest_%RELEASE_TAG%.txt
+                '''
+            }
+        }
+    }
+
+        always {
+            bat 'docker compose down -v'
+            archiveArtifacts artifacts: 'artifacts/*.json, artifacts/release_manifest_*.txt', allowEmptyArchive: true
+        }
+    }
+}
