@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="card shadow border-0" style="width: 100%; max-width: 430px; border-radius: 14px;">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="display-6 text-primary mb-2"><i class="bi bi-shield-lock-fill"></i></div>
+                <h4 class="fw-bold mb-1">Espace Académique ISGS</h4>
+                <p class="text-muted small">Connectez-vous pour gérer les étudiants et les notes</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-semibold">Nom d'utilisateur</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="admin ou teacher" required autofocus>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label fw-semibold">Mot de passe</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Se connecter
+                </button>
+            </form>
+
+            <div class="mt-4 p-3 bg-light rounded small text-muted">
+                <strong>Comptes de démonstration :</strong><br>
+                Admin : <code>admin</code> / <code>admin123</code><br>
+                Enseignant : <code>teacher</code> / <code>teacher123</code>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
