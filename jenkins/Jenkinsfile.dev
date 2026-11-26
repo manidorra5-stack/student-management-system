@@ -18,8 +18,8 @@ pipeline {
             parallel {
                 stage('Python 3.11 Matrix') {
                     steps {
-                        bat 'docker build --target builder --build-arg PYTHON_VERSION=3.11 -t sms-test-py311:%BUILD_NUMBER% .'
-                        bat 'docker run --rm sms-test-py311:%BUILD_NUMBER% sh -c "pip install --no-index --find-links=/build/wheels -r requirements.txt && python -c \\"import app; print(\'Python 3.11 import OK\')\\""'
+                        bat 'docker build --build-arg PYTHON_VERSION=3.11 --build-arg APP_VERSION=%APP_VERSION%-py311 -t sms-test-py311:%BUILD_NUMBER% .'
+                        bat 'docker run --rm sms-test-py311:%BUILD_NUMBER% pytest -v'
                         bat 'docker rmi -f sms-test-py311:%BUILD_NUMBER%'
                     }
                 }
