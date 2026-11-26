@@ -29,7 +29,7 @@ pipeline {
         stage('Release Verification & Smoke Test') {
             steps {
                 bat 'docker compose up -d'
-                bat 'python scripts/smoke_test.py --url http://localhost:5003 --report artifacts/release_smoke_report.json'
+                bat 'docker run --rm --network %COMPOSE_PROJECT_NAME%_sms_network -v "%WORKSPACE%/scripts:/app/scripts" -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% python /app/scripts/smoke_test.py --url http://web:5000 --report /app/artifacts/release_smoke_report.json'
             }
         }
 
@@ -44,6 +44,7 @@ pipeline {
         }
     }
 
+    post {
         always {
             bat 'docker compose down -v'
             archiveArtifacts artifacts: 'artifacts/*.json, artifacts/release_manifest_*.txt', allowEmptyArchive: true

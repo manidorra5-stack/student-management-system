@@ -15,21 +15,22 @@ pipeline {
             }
         }
 
-        stage('Unit Tests (Pytest)') {
+        stage('Build Docker Image & Run Unit Tests') {
             steps {
-                bat 'pytest -v --junitxml=artifacts/pr_unit_tests.xml'
+                bat 'docker compose build'
+                bat 'docker run --rm -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% pytest -v --junitxml=/app/artifacts/pr_unit_tests.xml'
             }
         }
 
-        stage('Docker Build & Start Stack') {
+        stage('Start Container Stack') {
             steps {
-                bat 'docker compose up -d --build'
+                bat 'docker compose up -d'
             }
         }
 
         stage('Smoke Tests (Live Container)') {
             steps {
-                bat 'python scripts/smoke_test.py --url http://localhost:5001 --report artifacts/pr_smoke_report.json'
+                bat 'docker run --rm --network %COMPOSE_PROJECT_NAME%_sms_network -v "%WORKSPACE%/scripts:/app/scripts" -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% python /app/scripts/smoke_test.py --url http://web:5000 --report /app/artifacts/pr_smoke_report.json'
             }
         }
     }
