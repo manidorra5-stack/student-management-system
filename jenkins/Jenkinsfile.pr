@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    environment {
+        COMPOSE_PROJECT_NAME = "sms_pr_${env.BUILD_NUMBER}"
+        HOST_PORT = "5001"
+        APP_VERSION = "pr-${env.BUILD_NUMBER}"
+        PYTHON_VERSION = "3.12"
+    }
+
+    stages {
+        stage('Checkout PR Branch') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image & Run Unit Tests') {
+            steps {
+                bat 'docker compose build'
+                bat 'docker run --rm -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% pytest -v --junitxml=/app/artifacts/pr_unit_tests.xml'
+            }
+        }
+
+        stage('Start Container Stack') {
+            steps {
+                bat 'docker compose up -d'
+            }
+        }
+
+        stage('Smoke Tests (Live Container)') {
+            steps {
+                bat 'docker run --rm --network %COMPOSE_PROJECT_NAME%_sms_network -v "%WORKSPACE%/scripts:/app/scripts" -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% python /app/scripts/smoke_test.py --url http://web:5000 --report /app/artifacts/pr_smoke_report.json'
+            }
+        }
+    }
+
+    post {
+        always {
+            bat 'docker compose down -v'
+            archiveArtifacts artifacts: 'artifacts/*.json, artifacts/*.xml', allowEmptyArchive: true
+        }
+    }
+}

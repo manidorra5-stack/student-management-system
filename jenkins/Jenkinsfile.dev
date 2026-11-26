@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+        COMPOSE_PROJECT_NAME = "sms_dev_${env.BUILD_NUMBER}"
+        HOST_PORT = "5002"
+        APP_VERSION = "dev-${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout dev Branch') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Parallel Build & Unit Tests (Python 3.11 & 3.12)') {
+            parallel {
+                stage('Python 3.11 Matrix') {
+                    steps {
+                        bat 'docker build --target builder --build-arg PYTHON_VERSION=3.11 -t sms-test-py311:%BUILD_NUMBER% .'
+                        bat 'docker run --rm sms-test-py311:%BUILD_NUMBER% sh -c "pip install --no-index --find-links=/build/wheels -r requirements.txt && python -c \\"import app; print(\'Python 3.11 import OK\')\\""'
+                        bat 'docker rmi -f sms-test-py311:%BUILD_NUMBER%'
+                    }
+                }
+                stage('Python 3.12 Matrix') {
+                    steps {
+                        bat 'docker build --build-arg PYTHON_VERSION=3.12 --build-arg APP_VERSION=%APP_VERSION% -t sms-test-py312:%BUILD_NUMBER% .'
+                        bat 'docker run --rm sms-test-py312:%BUILD_NUMBER% pytest -v'
+                        bat 'docker rmi -f sms-test-py312:%BUILD_NUMBER%'
+                    }
+                }
+            }
+        }
+
+        stage('Integration Deploy & Smoke Test') {
+            steps {
+                bat 'docker compose up -d --build'
+                bat 'docker run --rm --network %COMPOSE_PROJECT_NAME%_sms_network -v "%WORKSPACE%/scripts:/app/scripts" -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% python /app/scripts/smoke_test.py --url http://web:5000 --report /app/artifacts/dev_smoke_report.json'
+            }
+        }
+    }
+
+    post {
+        always {
+            bat 'docker compose down -v'
+            archiveArtifacts artifacts: 'artifacts/*.json', allowEmptyArchive: true
+        }
+    }
+}
