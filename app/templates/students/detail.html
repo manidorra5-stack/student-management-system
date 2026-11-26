@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Détails Étudiant - {{ student.first_name }} {{ student.last_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">{{ student.first_name }} {{ student.last_name }}</h2>
+        <span class="text-muted">Matricule : <code>{{ student.student_code }}</code> — {{ student.major }}</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('students.edit_student', student_id=student.id) }}" class="btn btn-outline-primary">Modifier</a>
+        <a href="{{ url_for('students.list_students') }}" class="btn btn-secondary">Retour</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">Informations Personnelles</div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Email :</strong> {{ student.email }}</p>
+                <p class="mb-2"><strong>Date de naissance :</strong> {{ student.date_of_birth or 'Non renseignée' }}</p>
+                <p class="mb-2"><strong>Niveau :</strong> {{ student.academic_level }}</p>
+                <p class="mb-2"><strong>Statut :</strong> <span class="badge bg-success text-uppercase">{{ student.status }}</span></p>
+                <hr>
+                <p class="mb-0"><strong>Moyenne Générale :</strong>
+                    {% if average is not none %}
+                        <span class="badge {{ 'bg-success' if average >= 10 else 'bg-danger' }} fs-6">{{ "%.2f"|format(average) }} / 20</span>
+                    {% else %}
+                        <span class="text-muted">Pas encore évalué</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card table-card shadow-sm">
+            <div class="card-header bg-white fw-bold">Cours Inscrits & Résultats</div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Matière</th>
+                            <th>Crédits</th>
+                            <th>Note Finale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in enrollments %}
+                        <tr>
+                            <td><code>{{ e.course_code }}</code></td>
+                            <td>{{ e.course_title }}</td>
+                            <td>{{ e.credits }}</td>
+                            <td>
+                                {% if e.final_grade is not none %}
+                                    <span class="badge {{ 'bg-success' if e.final_grade >= 10 else 'bg-danger' }}">{{ "%.2f"|format(e.final_grade) }} / 20</span>
+                                {% else %}
+                                    <span class="text-muted small">En attente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted py-4">Aucune inscription enregistrée.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

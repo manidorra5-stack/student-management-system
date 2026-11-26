@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifier' if student else 'Ajouter' }} un Étudiant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0" style="border-radius: 12px;">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold">{{ 'Modifier la fiche étudiant' if student else 'Ajouter un nouvel étudiant' }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Matricule Étudiant *</label>
+                            <input type="text" name="student_code" class="form-control" value="{{ student.student_code if student else '' }}" placeholder="STD-2026-006" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Date de naissance</label>
+                            <input type="date" name="date_of_birth" class="form-control" value="{{ student.date_of_birth if student and student.date_of_birth else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Prénom *</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ student.first_name if student else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nom *</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ student.last_name if student else '' }}" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Adresse Email *</label>
+                            <input type="email" name="email" class="form-control" value="{{ student.email if student else '' }}" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold">Filière</label>
+                            <input type="text" name="major" class="form-control" value="{{ student.major if student else 'Business Computing (3 LIG)' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Niveau Académique</label>
+                            <input type="text" name="academic_level" class="form-control" value="{{ student.academic_level if student else '3rd Year' }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Statut</label>
+                            <select name="status" class="form-select">
+                                <option value="active" {{ 'selected' if not student or student.status == 'active' }}>Actif</option>
+                                <option value="inactive" {{ 'selected' if student and student.status == 'inactive' }}>Inactif</option>
+                                <option value="graduated" {{ 'selected' if student and student.status == 'graduated' }}>Diplômé</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('students.list_students') }}" class="btn btn-outline-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary px-4">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

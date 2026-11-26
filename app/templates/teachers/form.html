@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifier' if teacher else 'Ajouter' }} un Enseignant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0" style="border-radius: 12px;">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold">{{ 'Modifier un enseignant' if teacher else 'Ajouter un enseignant' }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Code Enseignant *</label>
+                            <input type="text" name="teacher_code" class="form-control" value="{{ teacher.teacher_code if teacher else '' }}" placeholder="TCH-004" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Département *</label>
+                            <input type="text" name="department" class="form-control" value="{{ teacher.department if teacher else 'Informatique' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Prénom *</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ teacher.first_name if teacher else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nom *</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ teacher.last_name if teacher else '' }}" required>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold">Email *</label>
+                            <input type="email" name="email" class="form-control" value="{{ teacher.email if teacher else '' }}" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold">Téléphone</label>
+                            <input type="text" name="phone" class="form-control" value="{{ teacher.phone if teacher and teacher.phone else '' }}" placeholder="+216 ...">
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('teachers.list_teachers') }}" class="btn btn-outline-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary px-4">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

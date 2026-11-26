@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Nouvelle Inscription{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0" style="border-radius: 12px;">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold">Inscrire un étudiant à un cours</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Étudiant *</label>
+                        <select name="student_id" class="form-select" required>
+                            <option value="">-- Sélectionner un étudiant actif --</option>
+                            {% for s in students %}
+                            <option value="{{ s.id }}">{{ s.student_code }} - {{ s.first_name }} {{ s.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Cours *</label>
+                        <select name="course_id" class="form-select" required>
+                            <option value="">-- Sélectionner un cours --</option>
+                            {% for c in courses %}
+                            <option value="{{ c.id }}">{{ c.course_code }} - {{ c.title }} ({{ c.credits }} crédits)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Date d'inscription</label>
+                            <input type="date" name="enrollment_date" class="form-control" value="{{ today }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Statut</label>
+                            <select name="status" class="form-select">
+                                <option value="enrolled" selected>Inscrit (Enrolled)</option>
+                                <option value="completed">Validé (Completed)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('enrollments.list_enrollments') }}" class="btn btn-outline-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary px-4">Valider l'inscription</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

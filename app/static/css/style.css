@@ -1,0 +1,45 @@
+:root {
+    --primary-navy: #0f2942;
+    --accent-blue: #1d6fa5;
+    --bg-light: #f4f7fa;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar-isgs {
+    background: linear-gradient(135deg, var(--primary-navy) 0%, var(--accent-blue) 100%);
+}
+
+.kpi-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(15, 41, 66, 0.12) !important;
+}
+
+.table-card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.login-wrapper {
+    min-height: 82vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+footer {
+    margin-top: auto;
+}
