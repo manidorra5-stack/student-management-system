@@ -9,12 +9,24 @@
 
     stages {
         stage('Checkout') {
+            when {
+                anyOf {
+                    changeRequest target: 'dev'
+                    expression { return env.CHANGE_TARGET == null }
+                }
+            }
             steps {
                 checkout scm
             }
         }
 
         stage('Setup') {
+            when {
+                anyOf {
+                    changeRequest target: 'dev'
+                    expression { return env.CHANGE_TARGET == null }
+                }
+            }
             steps {
                 bat '''
                 if not exist artifacts mkdir artifacts
@@ -27,6 +39,12 @@
         }
 
         stage('Build') {
+            when {
+                anyOf {
+                    changeRequest target: 'dev'
+                    expression { return env.CHANGE_TARGET == null }
+                }
+            }
             steps {
                 bat 'docker compose build'
                 bat 'docker run --rm -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% pytest -v --junitxml=/app/artifacts/pr_unit_tests.xml'
@@ -34,18 +52,36 @@
         }
 
         stage('Run (Docker)') {
+            when {
+                anyOf {
+                    changeRequest target: 'dev'
+                    expression { return env.CHANGE_TARGET == null }
+                }
+            }
             steps {
                 bat 'docker compose up -d'
             }
         }
 
         stage('Smoke Test') {
+            when {
+                anyOf {
+                    changeRequest target: 'dev'
+                    expression { return env.CHANGE_TARGET == null }
+                }
+            }
             steps {
                 bat 'docker run --rm --network %COMPOSE_PROJECT_NAME%_sms_network -v "%WORKSPACE%/scripts:/app/scripts" -v "%WORKSPACE%/artifacts:/app/artifacts" student-management-system:%APP_VERSION% python /app/scripts/smoke_test.py --url http://web:5000 --report /app/artifacts/pr_smoke_report.json'
             }
         }
 
         stage('Archive Artifacts') {
+            when {
+                anyOf {
+                    changeRequest target: 'dev'
+                    expression { return env.CHANGE_TARGET == null }
+                }
+            }
             steps {
                 bat '''
                 echo Pipeline: sms-pr-multibranch > artifacts/pr_pipeline_report.txt
