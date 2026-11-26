@@ -16,6 +16,7 @@ pipeline {
 
         stage('Parallel Build & Unit Tests (Python 3.11 & 3.12)') {
             parallel {
+<<<<<<< HEAD
                 stage('Python 3.11 Matrix') {
                     steps {
                         bat 'docker build --build-arg PYTHON_VERSION=3.11 --build-arg APP_VERSION=%APP_VERSION%-py311 -t sms-test-py311:%BUILD_NUMBER% .'
@@ -23,6 +24,15 @@ pipeline {
                         bat 'docker rmi -f sms-test-py311:%BUILD_NUMBER%'
                     }
                 }
+=======
+           stage('Python 3.11 Matrix') {
+    steps {
+        bat 'docker build --build-arg PYTHON_VERSION=3.11 --build-arg APP_VERSION=%APP_VERSION%-py311 -t sms-test-py311:%BUILD_NUMBER% .'
+        bat 'docker run --rm sms-test-py311:%BUILD_NUMBER% pytest -v'
+        bat 'docker rmi -f sms-test-py311:%BUILD_NUMBER%'
+    }
+}
+>>>>>>> origin/dev
                 stage('Python 3.12 Matrix') {
                     steps {
                         bat 'docker build --build-arg PYTHON_VERSION=3.12 --build-arg APP_VERSION=%APP_VERSION% -t sms-test-py312:%BUILD_NUMBER% .'
