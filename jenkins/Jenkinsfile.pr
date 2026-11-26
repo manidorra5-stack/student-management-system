@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = "sms_pr_${BUILD_NUMBER}"
-        WEB_PORT = "5001"
+        HOST_PORT = "5001"
         APP_VERSION = "pr-${BUILD_NUMBER}"
     }
 
