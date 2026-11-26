@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = "sms_pr_${BUILD_NUMBER}"
-        HOST_PORT = "5001"
+        HOST_PORT = "${5100 + (env.BUILD_NUMBER.toInteger() % 800)}"
         APP_VERSION = "pr-${BUILD_NUMBER}"
     }
 
@@ -34,6 +34,7 @@ pipeline {
                 docker compose version
                 echo Target Branch: %CHANGE_TARGET%
                 echo Source Branch: %CHANGE_BRANCH%
+                echo Isolated Host Port: %HOST_PORT%
                 '''
             }
         }
